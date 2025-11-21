@@ -1,76 +1,95 @@
 variable "access_key" {
-  type        = string
   description = "AWS access key"
-  sensitive   = true
+  type        = string
 }
 
 variable "secret_key" {
-  type        = string
   description = "AWS secret key"
-  sensitive   = true
+  type        = string
 }
 
-variable "region" {
-  type        = string
+variable "aws_region" {
   description = "AWS region"
+  type        = string
   default     = "us-east-1"
 }
 
-# Variaveis do Banco de Dados
-
-variable "project_name" {
-  description = "Prefix for resource names"
+variable "vpc_cidr" {
+  description = "VPC CIDR"
   type        = string
-  default     = "todo-stack"
+  default     = "10.0.0.0/16"
 }
 
-variable "db_name" {
-  description = "Database name"
+variable "public_subnet_cidrs" {
+  description = "Public subnets CIDRs (list)"
+  type        = list(string)
+  default     = ["10.0.1.0/24", "10.0.2.0/24"]
+}
+
+variable "private_subnet_cidrs" {
+  description = "Private subnets CIDRs (list) - used for RDS/ECS"
+  type        = list(string)
+  default     = ["10.0.3.0/24", "10.0.4.0/24"]
+}
+
+variable "key_name" {
+  description = "EC2 Key pair name for SSH access"
   type        = string
-  default     = "todosdb"
+}
+
+variable "instance_type" {
+  description = "EC2 instance type"
+  type        = string
+  default     = "t3.micro"
+}
+
+variable "repo_url" {
+  description = "Git repository to clone on EC2 (HTTPS URL)"
+  type        = string
+  default     = "https://github.com/odutra-dev/to-do-aws.git"
+}
+
+variable "api_url" {
+  description = "API_URL value to pass to container(s) (ex: https://abcd.execute-api.region.amazonaws.com/prod )"
+  type        = string
 }
 
 variable "db_username" {
-  description = "DB master username (placeholder)"
-  type        = string
-  default     = "adminuser"
+  type    = string
+  default = "admin"
 }
 
 variable "db_password" {
-  description = "DB master password (placeholder) - change in real deployment"
   type        = string
-  default     = "ChangeMe123!"
+  description = "Postgres password"
+  default     = "postgres"
   sensitive   = true
 }
 
-variable "db_instance_class" {
-  description = "RDS instance class"
+variable "db_name" {
+  type    = string
+  default = "todosdb"
+}
+
+variable "ecs_desired_count" {
+  type    = number
+  default = 1
+}
+
+variable "allowed_ssh_cidr" {
+  description = "CIDR allowed to SSH into EC2. Use 0.0.0.0/0 only for testing (NOT RECOMMENDED)."
   type        = string
-  default     = "db.t3.micro"
+  default     = "0.0.0.0/0"
 }
-
-variable "db_allocated_storage" {
-  description = "RDS allocated storage (GB)"
-  type        = number
-  default     = 20
-}
-
-# Variaveis do Lambda
 
 variable "lambda_runtime" {
-  description = "Lambda runtime"
-  type        = string
-  default     = "nodejs18.x"
+  type    = string
+  default = "python3.9"
 }
 
-variable "lambda_timeout" {
-  description = "Lambda timeout (seconds)"
-  type        = number
-  default     = 10
-}
-
-variable "api_stage_name" {
-  description = "API Gateway stage name"
+# Optional - specify existing lambda layer S3 (for pg/psycopg2) if you have one
+variable "lambda_layer_arn" {
+  description = "Optional ARN of a Lambda Layer that provides PostgreSQL driver (psycopg2 / pg8000). If empty, lambda may fail unless you package dependencies."
   type        = string
-  default     = "dev"
+  default     = ""
 }
